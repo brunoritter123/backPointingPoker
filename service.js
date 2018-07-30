@@ -4,33 +4,47 @@ let app = require('express')();
 let http = require('http').Server(app);
 let io = require('socket.io')(http);
 
-let users = []
+let users  = []
+const cartas = [
+  {value: 1 , label: '1'  , type: 'default'},
+  {value: 2 , label: '2'  , type: 'default'},
+  {value: 3 , label: '3'  , type: 'default'},
+  {value: 5 , label: '5'  , type: 'default'},
+  {value: 8 , label: '8'  , type: 'default'},
+  {value: 13 , label: '13', type: 'default'},
+  {value: 21 , label: '21', type: 'default'},
+  {value: 54 , label: '54', type: 'default'},
+  {value: undefined   , label: '?'},
+]
 
 io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
-    let user = io.get('nameUser');
-    console.log('user disconnected: '+user);
-    const newLocal = 'Bruno';
-
     users = users.filter(function(us) {
-      console.log('filter: '+us.nome);
-      return us.nome !== newLocal;
+      return us.id !== socket.id;
+    });
+    io.emit('get-user', users);
+  });
+  
+  socket.on('add-voto', (carta) => {
+    users.forEach( (user) => {
+      if(user.id == socket.id) {
+        user.voto = carta;
+      }
     });
 
     io.emit('get-user', users);
   });
-  
-  socket.on('add-voto', (voto) => {
-    console.log(voto);
-    io.emit('get-votos', {type:'new-message', text: voto});
-  });
 
   socket.on('add-user', (user) => {
-    users.push({nome: user, voto: null})
-    io.set('nameUser', user)
+    users.push({id: socket.id, nome: user, voto: {valeu: null, label: null, type: null}})
     io.emit('get-user', users);
   });
+
+  socket.on('obs-cartas', () => {
+    io.emit('get-cartas', cartas);
+  });
+
 });
 
 http.listen(5000, () => {
