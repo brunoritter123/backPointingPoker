@@ -1,0 +1,24 @@
+{
+  "name": "back-pointing-poker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "service.js",
+  "dependencies": {
+    "express": "^4.16.3",
+    "socket.io": "^2.1.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brunoritter123/backPointingPoker.git"
+  },
+  "author": "Bruno Ritter",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/brunoritter123/backPointingPoker/issues"
+  },
+  "homepage": "https://github.com/brunoritter123/backPointingPoker#readme"
+}

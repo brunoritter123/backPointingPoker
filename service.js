@@ -1,5 +1,4 @@
 'use strict';
-
 let app = require('express')();
 let http = require('http').Server(app);
 let io = require('socket.io')(http);
@@ -36,8 +35,8 @@ io.on('connection', (socket) => {
     io.emit('get-user', users);
   });
 
-  socket.on('add-user', (user) => {
-    users.push({id: socket.id, nome: user, voto: {valeu: null, label: null, type: null}})
+  socket.on('add-user', (userName) => {
+    users.push({id: socket.id, nome: userName, voto: {value: null, label: null, type: null}})
     io.emit('get-user', users);
   });
 
