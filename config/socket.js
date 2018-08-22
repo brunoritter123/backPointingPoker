@@ -1,10 +1,9 @@
 socketIo     = require('socket.io');
-connection   = require('./database');
 UsersDAO     = require('../models/UsersDAO');
 
 module.exports = function (server) {
   let io      = socketIo.listen(server);
-  let userDAO =  new UsersDAO(connection);
+  let userDAO =  new UsersDAO();
 
   let users = []
   const votoNull = {
@@ -61,22 +60,11 @@ module.exports = function (server) {
   io.on('connection', (socket) => {
 
     socket.on('disconnect', () => {
-      let remover = false;
       users.forEach(function (us) {
         if (us.id == socket.id) {
-          if (us.voto.value === null || us.voto.value === undefined) {
-            remover = true;
-          } else {
-            us.status = "OFF"
-          }
+          us.status = "OFF"
         }
       });
-
-      if (remover) {
-        users = users.filter(function (us) {
-          return us.id !== socket.id;
-        });
-      }
 
       io.emit('get-user', users);
     });
@@ -105,14 +93,18 @@ module.exports = function (server) {
       }
     });
 
-    socket.on('add-user', (userName, isJogador, oldId) => {
+
+
+
+    socket.on('add-user', (idSala, idUser, userName, isJogador, oldId) => {
       let achou = false;
 
       if (oldId !== undefined) {
         users.forEach(function (us) {
           if (us.id == oldId) {
 
-            us.id = socket.id
+            us.id = idUser;
+            us.idSala = idSala;
             us.nome = userName;
             us.isJogador = isJogador;
             us.status = "ON";
@@ -123,7 +115,8 @@ module.exports = function (server) {
 
       if (!achou) {
         users.push({
-          id: socket.id,
+          id: idUser,
+          idSala: idSala,
           status: "ON",
           nome: userName,
           isJogador: isJogador,
@@ -138,7 +131,7 @@ module.exports = function (server) {
         isJogador: isJogador,
         voto: votoNull
       }
-      console.log(userDAO);
+
       userDAO.inserir(us);
 
       io.emit('get-user', users);
@@ -147,6 +140,9 @@ module.exports = function (server) {
     socket.on('obs-cartas', () => {
       io.emit('get-cartas', cartas);
     });
+
+
+
 
     socket.on('add-FimJogo', (fimJogo) => {
       io.emit('get-FimJogo', fimJogo);
