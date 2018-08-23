@@ -1,15 +1,15 @@
 socketIo     = require('socket.io');
-UsersDAO     = require('../models/UsersDAO');
+UserSchema   = require('../models/userSchemas');
+US           = require('../models/userService');
 
 module.exports = function (server) {
   let io      = socketIo.listen(server);
-  let userDAO =  new UsersDAO();
 
   let users = []
   const votoNull = {
-    value: null,
-    label: null,
-    type: null
+    value: 0,
+    label: '',
+    type: ''
   };
   const cartas = [{
       value: 1,
@@ -59,105 +59,77 @@ module.exports = function (server) {
 
   io.on('connection', (socket) => {
 
+//---------
+// DISCONNECT
+//---------
     socket.on('disconnect', () => {
-      users.forEach(function (us) {
-        if (us.id == socket.id) {
-          us.status = "OFF"
-        }
-      });
-
-      io.emit('get-user', users);
+      US.setOff(socket.id, (users, idSala) => {
+        io.to(idSala).emit('get-user', users);
+      })
     });
 
-    socket.on('remove', () => {
-      users = users.filter(function (us) {
-        return us.id !== socket.id;
-      });
-      io.emit('get-user', users);
+//---------
+// REMOVE
+//---------
+    socket.on('remove', (idSala, idUser) => {
+      US.remove(idSala, idUser, () => {
+        io.to(idSala).emit('get-user', users)
+      })
     });
 
-    socket.on('add-voto', (carta) => {
-      let acabouJogo = true;
-      users.forEach((user) => {
-        if (user.id == socket.id) {
-          user.voto = carta;
-        }
-        if (user.isJogador && !user.voto.label) {
-          acabouJogo = false;
-        }
-      });
-
-      io.emit('get-user', users);
-      if (acabouJogo) {
-        io.emit('get-FimJogo', true);
-      }
+//---------
+// ADD-VOTO
+//---------
+    socket.on('add-voto', (idUser, carta) => {
+      US.addVoto(idUser, carta, (users, idSala) => {
+        io.to(idSala).emit('get-user', users);
+      })
     });
 
+//---------
+// ADD-USER
+//---------
+    socket.on('add-user', (idSala, idUser, userName, isJogador) => {
+      socket.join(idSala);
 
-
-
-    socket.on('add-user', (idSala, idUser, userName, isJogador, oldId) => {
-      let achou = false;
-
-      if (oldId !== undefined) {
-        users.forEach(function (us) {
-          if (us.id == oldId) {
-
-            us.id = idUser;
-            us.idSala = idSala;
-            us.nome = userName;
-            us.isJogador = isJogador;
-            us.status = "ON";
-            achou = true;
-          }
-        });
-      }
-
-      if (!achou) {
-        users.push({
-          id: idUser,
-          idSala: idSala,
-          status: "ON",
-          nome: userName,
-          isJogador: isJogador,
-          voto: votoNull
-        });
-      }
-
-      var us = {
-        id: socket.id,
+      let usuario = new UserSchema({
+        idUser: idUser,
+        idSala: idSala.toUpperCase(),
+        idSocket: socket.id,
         status: "ON",
         nome: userName,
         isJogador: isJogador,
         voto: votoNull
-      }
+      });
 
-      userDAO.inserir(us);
-
-      io.emit('get-user', users);
+      US.newUser(usuario ,(docs) => {
+        io.to(idSala).emit('get-user', docs);
+      })
     });
 
-    socket.on('obs-cartas', () => {
-      io.emit('get-cartas', cartas);
+//-----------
+// OBS-CARTAS
+//-----------
+  socket.on('obs-cartas', (idSala) => {
+    socket.join(idSala);
+    io.to(idSala).emit('get-cartas', cartas);
+  });
+
+//-----------
+// RESET
+//-----------
+  socket.on('reset', (idSala) => {
+    US.reset(idSala, (users) => {
+      io.to(idSala).emit('get-user', users);
+      io.to(idSala).emit('get-FimJogo', false)
+    })
+  });
+
+//-----------
+// fimJogo
+//-----------
+    socket.on('fimJogo', (idSala) => {
+      io.to(idSala).emit('get-FimJogo', true)
     });
-
-
-
-
-    socket.on('add-FimJogo', (fimJogo) => {
-      io.emit('get-FimJogo', fimJogo);
-      if (!fimJogo) {
-        let retUsers = [];
-        users.forEach((user) => {
-          user.voto = votoNull
-          if (user.status === 'ON') {
-            retUsers.push(user);
-          }
-        });
-        users = retUsers;
-        io.emit('get-user', users);
-      }
-    });
-
   });
 }
