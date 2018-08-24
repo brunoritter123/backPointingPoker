@@ -39,7 +39,8 @@ module.exports = class UserService {
 
     await UserSchema.findOne({ idUser: idUser }, function (err, doc) {
       if (err) return console.error(err);
-  
+
+      doc.voto.id    = voto.id
       doc.voto.value = voto.value;
       doc.voto.label = voto.label;
       doc.voto.type  = voto.type;
@@ -76,7 +77,7 @@ module.exports = class UserService {
   }
 
   static async reset (idSala, callback) {
-    let votoNull = {value: 0, label: '', type: ''}
+    let votoNull = {id: undefined, value: undefined, label: '', type: ''}
 
     await UserSchema.updateMany(
       {idSala: idSala},

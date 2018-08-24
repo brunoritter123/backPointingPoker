@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
 
 const VotoSchema = new mongoose.Schema({
+  id: Number,
   value: Number,
   label: String,
   type: String
