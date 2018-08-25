@@ -30,7 +30,7 @@ module.exports = function (server) {
 // REMOVE
 //---------
     socket.on('remove', (idSala, idUser) => {
-      US.remove(idSala, idUser, () => {
+      US.remove(idSala, idUser, (users) => {
         io.to(idSala).emit('get-user', users)
       })
     });
