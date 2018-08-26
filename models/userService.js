@@ -40,20 +40,22 @@ module.exports = class UserService {
     await UserSchema.findOne({ idUser: idUser }, function (err, doc) {
       if (err) return console.error(err);
 
-      doc.voto.id    = voto.id
-      doc.voto.value = voto.value;
-      doc.voto.label = voto.label;
-      doc.voto.type  = voto.type;
+      if (doc !== null) {
+        doc.voto.id    = voto.id
+        doc.voto.value = voto.value;
+        doc.voto.label = voto.label;
+        doc.voto.type  = voto.type;
 
-      doc.save((err) => {
-        if (err) return console.error(err);
-
-        UserSchema.find({ idSala: doc.idSala }, function (err, docs) {
+        doc.save((err) => {
           if (err) return console.error(err);
-      
-          callback(docs, doc.idSala);
+
+          UserSchema.find({ idSala: doc.idSala }, function (err, docs) {
+            if (err) return console.error(err);
+        
+            callback(docs, doc.idSala);
+          });
         });
-      });
+      }
     });
   }
 

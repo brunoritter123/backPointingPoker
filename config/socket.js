@@ -30,67 +30,80 @@ module.exports = function (server) {
 // REMOVE
 //---------
     socket.on('remove', (idSala, idUser) => {
-      US.remove(idSala, idUser, (users) => {
-        io.to(idSala).emit('get-user', users)
-      })
+      if (idSala !== undefined && idUser !== undefined) {
+        US.remove(idSala, idUser, (users) => {
+          io.to(idSala).emit('get-user', users)
+        })
+      }
     });
 
 //---------
 // ADD-VOTO
 //---------
     socket.on('add-voto', (idUser, carta) => {
-      US.addVoto(idUser, carta, (users, idSala) => {
-        io.to(idSala).emit('get-user', users);
-      })
+      if (carta !== undefined && idUser !== undefined) {
+        US.addVoto(idUser, carta, (users, idSala) => {
+          io.to(idSala).emit('get-user', users);
+        })
+      }
     });
 
 //---------
 // ADD-USER
 //---------
     socket.on('add-user', (idSala, idUser, userName, isJogador) => {
-      socket.join(idSala);
+      if (idSala !== undefined && idUser !== undefined && userName !== undefined && isJogador !== undefined) {
+        socket.join(idSala);
 
-      let usuario = new UserSchema({
-        idUser: idUser,
-        idSala: idSala.toUpperCase(),
-        idSocket: socket.id,
-        status: "ON",
-        nome: userName,
-        isJogador: isJogador,
-        voto: {id: undefined,
-              value: undefined,
-              label: '',
-              type: ''}
-      });
+        let usuario = new UserSchema({
+          idUser: idUser,
+          idSala: idSala.toUpperCase(),
+          idSocket: socket.id,
+          status: "ON",
+          nome: userName,
+          isJogador: isJogador,
+          voto: {id: undefined,
+                value: undefined,
+                label: '',
+                type: ''}
+        });
 
-      US.newUser(usuario ,(docs) => {
-        io.to(idSala).emit('get-user', docs);
-      })
+        US.newUser(usuario ,(docs) => {
+          io.to(idSala).emit('get-user', docs);
+        })
+      }
     });
 
 //-----------
 // OBS-CARTAS
 //-----------
   socket.on('obs-cartas', (idSala) => {
-    socket.join(idSala);
-    io.to(idSala).emit('get-cartas', cartas);
+    if (idSala !== undefined) {
+      socket.join(idSala);
+      io.to(idSala).emit('get-cartas', cartas);
+    }
   });
 
 //-----------
 // RESET
 //-----------
   socket.on('reset', (idSala) => {
-    US.reset(idSala, (users) => {
-      io.to(idSala).emit('get-user', users);
-      io.to(idSala).emit('get-FimJogo', false)
-    })
+    if (idSala !== undefined) {
+      US.reset(idSala, (users) => {
+        io.to(idSala).emit('get-user', users);
+        io.to(idSala).emit('get-FimJogo', false)
+      })
+    }
   });
 
 //-----------
 // fimJogo
 //-----------
     socket.on('fimJogo', (idSala) => {
-      io.to(idSala).emit('get-FimJogo', true)
+      if (idSala !== undefined) {
+        io.to(idSala).emit('get-FimJogo', true)
+      }
     });
+
   });
 }
