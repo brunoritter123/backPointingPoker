@@ -51,7 +51,7 @@ module.exports = function (server) {
 //---------
 // ADD-USER
 //---------
-    socket.on('add-user', (idSala, idUser, userName, isJogador) => {
+    socket.on('add-user', (idSala, idUser, userName, isJogador, voto) => {
       if (idSala !== undefined && idUser !== undefined && userName !== undefined && isJogador !== undefined) {
         socket.join(idSala);
 
@@ -62,13 +62,10 @@ module.exports = function (server) {
           status: "ON",
           nome: userName,
           isJogador: isJogador,
-          voto: {id: undefined,
-                value: undefined,
-                label: '',
-                type: ''}
+          voto: voto
         });
 
-        US.newUser(usuario ,(docs) => {
+        US.loginUser(usuario ,(docs) => {
           io.to(idSala).emit('get-user', docs);
         })
       }

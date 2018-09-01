@@ -4,13 +4,41 @@ UserSchema = require('./userSchemas');
 module.exports = class UserService {
 
 
-  static async newUser (usuario, callback) {
+  static async loginUser (usuario, callback) {
 
-    await UserSchema.deleteMany({ idUser: usuario.idUser }, function (err) {
+    await UserSchema.find({ idUser: usuario.idUser }, function (err, docs) {
       if (err) return console.error(err);
-    });
 
-    await usuario.save((err) => {
+      if (docs === null || docs === undefined || docs.length === 0) {
+        UserService.saveUser(usuario, callback);
+
+      } else if (docs.length === 1) {
+
+        const doc = docs[0];
+
+        doc.idUser    = usuario.idUser    ;
+        doc.idSala    = usuario.idSala    ;
+        doc.idSocket  = usuario.idSocket  ;
+        doc.status    = usuario.status    ;
+        doc.nome      = usuario.nome      ;
+        doc.isJogador = usuario.isJogador ;
+
+        UserService.saveUser(doc, callback);
+
+      } else {
+        UserSchema.deleteMany({ idUser: usuario.idUser }, function (err) {
+          if (err) return console.error(err);
+
+          UserService.saveUser(usuario, callback)
+        });
+      }
+
+    });
+  }
+
+
+  static async saveUser(usuario, callback) {
+    usuario.save((err) => {
       if (err) return console.error(err);
 
       UserSchema.find({ idSala: usuario.idSala }, function (err, docs) {
@@ -20,7 +48,6 @@ module.exports = class UserService {
       });
     });
   }
-
 
   static async remove (idSala, idUser, callback) {
 
@@ -41,10 +68,10 @@ module.exports = class UserService {
       if (err) return console.error(err);
 
       if (doc !== null) {
-        doc.voto.id    = voto.id
-        doc.voto.value = voto.value;
-        doc.voto.label = voto.label;
-        doc.voto.type  = voto.type;
+        doc.voto = {id    : voto.id,
+                    value : voto.value,
+                    label : voto.label,
+                    type  : voto.type}
 
         doc.save((err) => {
           if (err) return console.error(err);
