@@ -13,7 +13,7 @@ var UserSchema = new mongoose.Schema({
   idSocket: String,
   status: String,
   nome: String,
-  isJogador: String,
+  isJogador: Boolean,
   voto: VotoSchema
 });
 
