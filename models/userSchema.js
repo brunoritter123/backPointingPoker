@@ -1,11 +1,5 @@
 var mongoose = require('mongoose');
-
-const VotoSchema = new mongoose.Schema({
-  id: Number,
-  value: Number,
-  label: String,
-  type: String
-})
+var CartaSchema = require('./cartaSchema');
 
 var UserSchema = new mongoose.Schema({
   idUser: String,
@@ -14,7 +8,7 @@ var UserSchema = new mongoose.Schema({
   status: String,
   nome: String,
   isJogador: Boolean,
-  voto: VotoSchema
+  voto: CartaSchema
 });
 
 module.exports = mongoose.model('User', UserSchema)

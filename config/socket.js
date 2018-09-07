@@ -1,19 +1,12 @@
 socketIo     = require('socket.io');
-UserSchema   = require('../models/userSchemas');
-US           = require('../models/userService');
+UserSchema   = require('../models/userSchema');
+US           = require('../services/userService');
+SalaSchema   = require('../models/salaSchema');
+SalaService  = require('../services/salaService');
+CartaSchema  = require('../models/cartaSchema')
 
 module.exports = function (server) {
   let io = socketIo.listen(server);
-
-  const cartas = [{id: 1, value: 1, label: '1', type: 'default' },
-    {id: 2, value: 2, label: '2', type: 'default' },
-    {id: 3, value: 3, label: '3', type: 'default' },
-    {id: 4, value: 5, label: '5', type: 'default' },
-    {id: 5, value: 8, label: '8', type: 'default' },
-    {id: 6, value: 13, label: '13', type: 'default' },
-    {id: 7, value: 21, label: '21', type: 'default' },
-    {id: 8, value: 54, label: '54', type: 'default' },
-    {id: 9, value: undefined, label: '?' }]
 
   io.on('connection', (socket) => {
 
@@ -68,18 +61,12 @@ module.exports = function (server) {
         US.loginUser(usuario ,(docs) => {
           io.to(idSala).emit('get-user', docs);
         })
+
+        SalaService.loginUser(idSala, (sala) => {
+          io.to(socket.id).emit('get-sala', sala);
+         });
       }
     });
-
-//-----------
-// OBS-CARTAS
-//-----------
-  socket.on('obs-cartas', (idSala) => {
-    if (idSala !== undefined) {
-      socket.join(idSala);
-      io.to(idSala).emit('get-cartas', cartas);
-    }
-  });
 
 //-----------
 // RESET
@@ -88,17 +75,19 @@ module.exports = function (server) {
     if (idSala !== undefined) {
       US.reset(idSala, (users) => {
         io.to(idSala).emit('get-user', users);
-        io.to(idSala).emit('get-FimJogo', false)
-      })
+      });
     }
   });
 
 //-----------
-// fimJogo
+// UPDATE-SALA
 //-----------
-    socket.on('fimJogo', (idSala) => {
-      if (idSala !== undefined) {
-        io.to(idSala).emit('get-FimJogo', true)
+    socket.on('update-sala', (sala) => {
+      if (sala !== undefined) {
+        SalaService.updateSala(sala, (doc) => {
+          console.log(doc.idSala);
+          io.to(doc.idSala).emit('get-sala', doc);
+        });
       }
     });
 

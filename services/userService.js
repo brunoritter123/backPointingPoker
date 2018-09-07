@@ -1,5 +1,5 @@
 
-UserSchema = require('./userSchemas');
+UserSchema = require('../models/userSchema');
 
 module.exports = class UserService {
 
