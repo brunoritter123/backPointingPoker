@@ -21,7 +21,9 @@ module.exports = class SalaService {
       if (docs === null || docs === undefined || docs.length === 0) {
         const sala = new SalaSchema({
                     idSala: idSala,
-                    cartas: padraoCartas, 
+                    cartas: padraoCartas,
+                    jogadorFinaliza: true,
+                    jogadorReseta: true, 
                     forceFimJogo: false});
 
         SalaService.saveSala(sala, callback);
@@ -37,6 +39,8 @@ module.exports = class SalaService {
           const sala = new SalaSchema({
                       idSala: idSala,
                       cartas: padraoCartas,
+                      jogadorFinaliza: true,
+                      jogadorReseta: true,
                       forceFimJogo: false });
           SalaService.saveSala(sala, callback);
         });
