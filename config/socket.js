@@ -15,17 +15,17 @@ module.exports = function (server) {
 //---------
     socket.on('disconnect', () => {
       US.setOff(socket.id, (users, idSala) => {
-        io.to(idSala).emit('get-user', users);
+        io.to(idSala).emit('get-user', {users: users, timeEnvio: new Date().getTime()});
       })
     });
 
 //---------
 // REMOVE
 //---------
-    socket.on('remove', (idSala, idUser) => {
+    socket.on('remove', (idSala, idUser, timeEnvio) => {
       if (idSala !== undefined && idUser !== undefined) {
         US.remove(idSala, idUser, (users) => {
-          io.to(idSala).emit('get-user', users)
+          io.to(idSala).emit('get-user', {users: users, timeEnvio: timeEnvio})
         })
       }
     });
@@ -33,10 +33,10 @@ module.exports = function (server) {
 //---------
 // ADD-VOTO
 //---------
-    socket.on('add-voto', (idUser, carta) => {
+    socket.on('add-voto', (idUser, carta, timeEnvio) => {
       if (carta !== undefined && idUser !== undefined) {
         US.addVoto(idUser, carta, (users, idSala) => {
-          io.to(idSala).emit('get-user', users);
+          io.to(idSala).emit('get-user', {users: users, timeEnvio: timeEnvio});
         })
       }
     });
@@ -44,7 +44,7 @@ module.exports = function (server) {
 //---------
 // ADD-USER
 //---------
-    socket.on('add-user', (idSala, idUser, userName, isJogador, voto) => {
+    socket.on('add-user', (idSala, idUser, userName, isJogador, voto, timeEnvio) => {
       if (idSala !== undefined && idUser !== undefined && userName !== undefined && isJogador !== undefined) {
         socket.join(idSala);
 
@@ -59,7 +59,7 @@ module.exports = function (server) {
         });
 
         US.loginUser(usuario ,(docs) => {
-          io.to(idSala).emit('get-user', docs);
+          io.to(idSala).emit('get-user', {users: docs, timeEnvio: timeEnvio});
         })
 
         SalaService.loginUser(idSala, (sala) => {
@@ -71,10 +71,10 @@ module.exports = function (server) {
 //-----------
 // RESET
 //-----------
-  socket.on('reset', (idSala) => {
+  socket.on('reset', (idSala, timeEnvio) => {
     if (idSala !== undefined) {
       US.reset(idSala, (users) => {
-        io.to(idSala).emit('get-user', users);
+        io.to(idSala).emit('get-user', {users: users, timeEnvio: timeEnvio});
       });
     }
   });
@@ -85,7 +85,6 @@ module.exports = function (server) {
     socket.on('update-sala', (sala) => {
       if (sala !== undefined) {
         SalaService.updateSala(sala, (doc) => {
-          console.log(doc.idSala);
           io.to(doc.idSala).emit('get-sala', doc);
         });
       }
