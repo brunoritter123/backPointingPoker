@@ -41,6 +41,14 @@ module.exports = function (server) {
       }
     });
 
+    socket.on('send-sala', (idUser, userName, sala, timeEnvio) => {
+      if (idUser !== undefined && sala !== undefined) {
+        US.addVoto(idUser, carta, (users, idSala) => {
+          io.to(idSala).emit('get-user', {users: users, timeEnvio: timeEnvio});
+        })
+      }
+    });
+
 //---------
 // ADD-USER
 //---------
@@ -82,10 +90,10 @@ module.exports = function (server) {
 //-----------
 // UPDATE-SALA
 //-----------
-    socket.on('update-sala', (sala) => {
+    socket.on('update-sala', (myId, userName, isUpdConfig, sala) => {
       if (sala !== undefined) {
         SalaService.updateSala(sala, (doc) => {
-          io.to(doc.idSala).emit('get-sala', doc);
+          io.to(doc.idSala).emit('get-sala', doc, myId, userName, isUpdConfig);
         });
       }
     });
