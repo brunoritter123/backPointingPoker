@@ -28,7 +28,7 @@ module.exports = class SalaService {
         });
       }
 
-    });
+    }).catch(e => console.error("Erro no find1: "+e));
   }
 
   static async saveSala(sala, callback) {
@@ -56,7 +56,7 @@ module.exports = class SalaService {
       if (err) return console.error(err);
   
       callback(doc);
-    });
+    }).catch(e => console.error("Erro no findOne1: "+e));
   }
 
   static async getDefSala(idSala) {

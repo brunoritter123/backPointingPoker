@@ -33,7 +33,7 @@ module.exports = class UserService {
         });
       }
 
-    });
+    }).catch(e => console.error("Erro no find2: "+e));
   }
 
 
@@ -45,7 +45,7 @@ module.exports = class UserService {
         if (err) return console.error(err);
     
         callback(docs);
-      });
+      }).catch(e => console.error("Erro no find3: "+e));
     });
   }
 
@@ -58,7 +58,7 @@ module.exports = class UserService {
         if (err) return console.error(err);
     
         callback(docs);
-      });
+      }).catch(e => console.error("Erro no find4: "+e));
     });
   }
 
@@ -80,10 +80,10 @@ module.exports = class UserService {
             if (err) return console.error(err);
         
             callback(docs, doc.idSala);
-          });
+          }).catch(e => console.error("Erro no find5: "+e));
         });
       }
-    });
+    }).catch(e => console.error("Erro no findOne2: "+e));
   }
 
   static async setOff (idSocket, callback) {
@@ -99,10 +99,10 @@ module.exports = class UserService {
             if (err) return console.error(err);
         
             callback(docs, doc.idSala);
-          });
+          }).catch(e => console.error("Erro no find6: "+e));
         });
       }
-    });
+    }).catch(e => console.error("Erro no findOne3: "+e));
   }
 
   static async reset (idSala, callback) {
@@ -115,7 +115,7 @@ module.exports = class UserService {
         UserSchema.find({ idSala: idSala }, function (err, docs) {
           if (err) return console.error(err);
           callback(docs);
-        });
+        }).catch(e => console.error("Erro no find7: "+e));
       });
   }
 }
