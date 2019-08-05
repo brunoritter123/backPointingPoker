@@ -16,11 +16,19 @@ module.exports = class SalaService {
 			db.get(`
 				SELECT * FROM sala
 				WHERE idSala = '${idSala}'
-				;`,[], (err,row) => {
+				;`,[], (err,sala) => {
 					if (err) return console.error(err)
 
-					if (row) {
-						callback(row);
+					if (sala) {
+						db.all(`
+							SELECT * FROM carta
+							WHERE idSala = '${idSala}'
+							;`, (err, newCartas) => {
+								if (err) return console.error(err)
+
+								sala.carta = newCartas
+								callback(sala)
+							})
 
 					} else {
 						SalaService.newSala(idSala, callback)
@@ -121,7 +129,6 @@ module.exports = class SalaService {
 										if (err) return console.error(err)
 
 										newSala.carta = newCartas
-										console.log(newSala)
 										callback(newSala)
 									})
 						})

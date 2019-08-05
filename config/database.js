@@ -47,7 +47,7 @@ const createTable = () => {
 				id INTEGER PRIMARY KEY AUTOINCREMENT,
 				idSala TEXT,
 				value INTEGER,
-				label TEXT,acoesSala
+				label TEXT,
 				type TEXT,
 				FOREIGN KEY(idSala) REFERENCES sala(idSala)
 			);`);
@@ -74,5 +74,6 @@ let db = new sqlite3.Database("./dataBase.sqlite3", (err) => {
 		createTable()
 	}
 })
+
 
 module.exports = db
