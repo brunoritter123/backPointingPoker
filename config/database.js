@@ -3,16 +3,17 @@ const sqlite3 = require('sqlite3').verbose();
 const createTable = () => {
 
 	db.serialize( () => {
+/*
 		db.exec(`
 			CREATE TABLE IF NOT EXISTS acoesSala(
 				label TEXT,
 				value INTEGER
 			);`);
-
+*/
 		db.exec(`
 			CREATE TABLE IF NOT EXISTS acoesSala(
-				value TEXT PRIMARY
-				label TEXT,
+				value TEXT PRIMARY KEY,
+				label TEXT
 			);`, () => {
 				db.exec(`
 				INSERT INTO acoesSala(label,value)
@@ -41,35 +42,35 @@ const createTable = () => {
 				FOREIGN KEY(removerAdm) REFERENCES acoesSala(value)
 			);`);
 
-
 		db.exec(`
 			CREATE TABLE IF NOT EXISTS carta(
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
 				idSala TEXT,
-				id INTEGER,
 				value INTEGER,
-				label TEXT,
+				label TEXT,acoesSala
 				type TEXT,
 				FOREIGN KEY(idSala) REFERENCES sala(idSala)
 			);`);
 
 		db.exec(`
 			CREATE TABLE IF NOT EXISTS usuario(
+				idUser TEXT PRIMARY KEY,
 				idSala TEXT,
-				idUser TEXT,
 				idSocket TEXT,
 				status TEXT,
 				nome TEXT,
 				isJogador INTEGER,
 				idCarta INTEGER,
+				FOREIGN KEY(idCarta) REFERENCES carta(id)
 				FOREIGN KEY(idSala) REFERENCES sala(idSala)
 			);`);
 	});
 }
 
 let db = new sqlite3.Database("./dataBase.sqlite3", (err) => {
-	if (err) { 
+	if (err) {
 		console.log('Erro ao criar o banco de dados', err)
-	} else { 
+	} else {
 		createTable()
 	}
 })

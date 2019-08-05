@@ -1,121 +1,127 @@
 
 UserSchema = require('../models/userSchema');
+sqlite3      = require('sqlite3').verbose();
+
+const db = new sqlite3.Database("./dataBase.sqlite3", (err) =>{
+  if (err) {
+    console.error(err);
+  }
+});
 
 module.exports = class UserService {
 
+	static loginUser (usuario, callback) {
 
-  static async loginUser (usuario, callback) {
+		db.serialize( () => {
+			db.run(`
+			INSERT OR REPLACE INTO usuario
+				(idSala, idUser, idSocket, status, nome, isJogador)
+			VALUES (
+				'${usuario.idSala}',
+				'${usuario.idUser}',
+				'${usuario.idSocket}',
+				'${usuario.status}',
+				'${usuario.nome}',
+				 ${String(usuario.isJogador)});`,[], (err) => {
+					if (err) return console.error(err)
 
-    await UserSchema.find({ idUser: usuario.idUser }, function (err, docs) {
-      if (err) return console.error(err);
+					db.all(`
+						SELECT * FROM usuario
+						WHERE idSala = '${usuario.idSala}'
+						;`, (err, rows) => {
+							if (err) return console.error(err)
+							callback(rows)
+					})
+				})
+		})
+	}
 
-      if (docs === null || docs === undefined || docs.length === 0) {
-        UserService.saveUser(usuario, callback);
+	static remove (idSala, idUser, callback) {
+		db.serialize( () => {
+			db.run(`
+				DELETE FROM usuario
+				WHERE idUser = '${idUser}'
+				;`, [], (err) => {
+					if (err) return console.error(err)
 
-      } else if (docs.length === 1) {
+					db.all(`
+						SELECT * FROM usuario
+						WHERE idSala = '${idSala}'
+						;`, (err, rows) => {
+							if (err) return console.error(err)
 
-        const doc = docs[0];
+							callback(rows)
+					})
+				})
+		})
+	}
 
-        doc.idUser    = usuario.idUser    ;
-        doc.idSala    = usuario.idSala    ;
-        doc.idSocket  = usuario.idSocket  ;
-        doc.status    = usuario.status    ;
-        doc.nome      = usuario.nome      ;
-        doc.isJogador = usuario.isJogador ;
+	static addVoto (idUser, voto, callback) {
+		db.serialize( () => {
+			db.run(`
+				UPDATE usuario SET idCarta = '$idCarta'
+				WHERE idUser = '$idUser'
+				;`, {$idCarta: voto.id, $idUser: idUser}, (err) => {
+					if (err) return console.error(err)
 
-        UserService.saveUser(doc, callback);
+					db.all(`
+						SELECT * FROM usuario
+						WHERE idUser = '${idUser}'
+						;`, (err, rows) => {
+							if (err) return console.error(err)
 
-      } else {
-        UserSchema.deleteMany({ idUser: usuario.idUser }, function (err) {
-          if (err) return console.error(err);
+							callback(rows)
+					})
+				})
+		})
+	}
 
-          UserService.saveUser(usuario, callback)
-        });
-      }
+	static setOff (idSocket, callback) {
+		db.serialize( () => {
+			db.run(`
+				UPDATE usuario SET status = 'OFF'
+				WHERE idSocket = '${idSocket}'
+				;`, [])
 
-    }).catch(e => console.error("Erro no find2: "+e));
-  }
+				db.all(`
+					SELECT idSala FROM usuario
+					WHERE idSocket = '${idSocket}'
+					;`, [], (err, row) => {
+						if (err) {
+							console.error(err)
+						} else {
+							db.each(`
+							SELECT idSala FROM usuario
+							WHERE idSocket = '${idSocket}'
+							;`, (err, rows) => {
+								if (err) {
+									console.error(err)
+								} else {
+									callback(rows, row.idSala)
+								}
+							})
+						}
+				});
+		})
+	}
 
+	static reset (db, idSala, callback) {
+		db.serialize( () => {
+			db.run(`
+				UPDATE usuario SET voto = null
+				WHERE idSala = $idSala
+				;`, {$idSala: idSala}, (err) => {
+					if (err) return console.error(err)
 
-  static async saveUser(usuario, callback) {
-    usuario.save((err) => {
-      if (err) return console.error(err);
+					db.all(`
+						SELECT * FROM usuario
+						WHERE idSala = ${idSala}
+						;`, (err, rows) => {
+							if (err) return console.error(err)
 
-      UserSchema.find({ idSala: usuario.idSala }, function (err, docs) {
-        if (err) return console.error(err);
-    
-        callback(docs);
-      }).catch(e => console.error("Erro no find3: "+e));
-    });
-  }
-
-  static async remove (idSala, idUser, callback) {
-
-    await UserSchema.deleteMany({ idUser: idUser }, function (err) {
-      if (err) return console.error(err);
-
-      UserSchema.find({ idSala: idSala }, function (err, docs) {
-        if (err) return console.error(err);
-    
-        callback(docs);
-      }).catch(e => console.error("Erro no find4: "+e));
-    });
-  }
-
-  static async addVoto (idUser, voto, callback) {
-
-    await UserSchema.findOne({ idUser: idUser }, function (err, doc) {
-      if (err) return console.error(err);
-
-      if (doc !== null) {
-        doc.voto = {id    : voto.id,
-                    value : voto.value,
-                    label : voto.label,
-                    type  : voto.type}
-
-        doc.save((err) => {
-          if (err) return console.error(err);
-
-          UserSchema.find({ idSala: doc.idSala }, function (err, docs) {
-            if (err) return console.error(err);
-        
-            callback(docs, doc.idSala);
-          }).catch(e => console.error("Erro no find5: "+e));
-        });
-      }
-    }).catch(e => console.error("Erro no findOne2: "+e));
-  }
-
-  static async setOff (idSocket, callback) {
-
-    await UserSchema.findOne({ idSocket: idSocket }, function (err, doc) {
-      if (err) return console.error(err);
-      if (doc !== null) {
-        doc.status = 'OFF'
-        doc.save((err) => {
-          if (err) return console.error(err);
-
-          UserSchema.find({ idSala: doc.idSala }, function (err, docs) {
-            if (err) return console.error(err);
-        
-            callback(docs, doc.idSala);
-          }).catch(e => console.error("Erro no find6: "+e));
-        });
-      }
-    }).catch(e => console.error("Erro no findOne3: "+e));
-  }
-
-  static async reset (idSala, callback) {
-    let votoNull = {id: undefined, value: undefined, label: '', type: ''}
-
-    await UserSchema.updateMany(
-      {idSala: idSala},
-      {voto: votoNull},
-       () => {
-        UserSchema.find({ idSala: idSala }, function (err, docs) {
-          if (err) return console.error(err);
-          callback(docs);
-        }).catch(e => console.error("Erro no find7: "+e));
-      });
-  }
+							callback(rows)
+					})
+				})
+		})
+	}
 }
