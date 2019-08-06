@@ -26,7 +26,7 @@ module.exports = class SalaService {
 							;`, (err, newCartas) => {
 								if (err) return console.error(err)
 
-								sala.carta = newCartas
+								sala.cartas = newCartas
 								callback(sala)
 							})
 
@@ -128,7 +128,7 @@ module.exports = class SalaService {
 									;`, (err, newCartas) => {
 										if (err) return console.error(err)
 
-										newSala.carta = newCartas
+										newSala.cartas = newCartas
 										callback(newSala)
 									})
 						})

@@ -36,7 +36,7 @@ module.exports = function (server) {
 //---------
     socket.on('add-voto', (idUser, carta, timeEnvio) => {
       console.log("add-voto")
-      if (carta !== undefined && idUser !== undefined) {
+      if (carta && idUser) {
         US.addVoto(idUser, carta, (users, idSala) => {
           io.to(idSala).emit('get-user', {users: users, timeEnvio: timeEnvio});
         })
