@@ -34,10 +34,10 @@ module.exports = function (server) {
 //---------
 // ADD-VOTO
 //---------
-    socket.on('add-voto', (idUser, carta, timeEnvio) => {
+    socket.on('add-voto', (idUser, carta, idSala, timeEnvio) => {
       console.log("add-voto")
       if (carta && idUser) {
-        US.addVoto(idUser, carta, (users, idSala) => {
+        US.addVoto(idUser, carta, idSala, (users) => {
           io.to(idSala).emit('get-user', {users: users, timeEnvio: timeEnvio});
         })
       }

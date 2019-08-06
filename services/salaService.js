@@ -53,21 +53,28 @@ module.exports = class SalaService {
 			db.run(`
 				UPDATE sala SET
 					forceFimJogo = ${sala.forceFimJogo},
-					finalizar = ${sala.finalizar},
-					resetar = ${sala.resetar},
-					removerJogador = ${sala.removerJogador},
-					removerAdm = ${sala.removerAdm}
-				WHERE idSala = ${sala.idSala}
+					finalizar = '${sala.finalizar}',
+					resetar = '${sala.resetar}',
+					removerJogador = '${sala.removerJogador}',
+					removerAdm = '${sala.removerAdm}'
+				WHERE idSala = '${sala.idSala}'
 				;`, [], (err) => {
 					if (err) return console.error(err)
 
-					db.all(`
+					db.get(`
 						SELECT * FROM sala
-						WHERE idSala = ${sala.idSala}
-						;`, (err, rows) => {
+						WHERE idSala = '${sala.idSala}'
+						;`, (err, sala) => {
 							if (err) return console.error(err)
+							db.all(`
+								SELECT * FROM carta
+								WHERE idSala = '${sala.idSala}'
+								;`, (err, newCartas) => {
+									if (err) return console.error(err)
 
-							callback(rows)
+									sala.cartas = newCartas
+									callback(sala)
+								})
 					})
 				})
 		})

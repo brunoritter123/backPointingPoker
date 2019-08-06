@@ -56,7 +56,7 @@ module.exports = class UserService {
 		})
 	}
 
-	static addVoto (idUser, voto, callback) {
+	static addVoto (idUser, voto, idSala, callback) {
 		db.serialize( () => {
 			db.run(`
 				UPDATE usuario SET idCarta = '${voto.id}'
@@ -66,7 +66,7 @@ module.exports = class UserService {
 
 					db.all(`
 						SELECT * FROM usuario
-						WHERE idUser = '${idUser}'
+						WHERE idSala = '${idSala}'
 						;`, (err, rows) => {
 							if (err) return console.error(err)
 
@@ -105,17 +105,17 @@ module.exports = class UserService {
 		})
 	}
 
-	static reset (db, idSala, callback) {
+	static reset (idSala, callback) {
 		db.serialize( () => {
 			db.run(`
 				UPDATE usuario SET idCarta = null
-				WHERE idSala = $idSala
-				;`, {$idSala: idSala}, (err) => {
+				WHERE idSala = '${idSala}'
+				;`, [], (err) => {
 					if (err) return console.error(err)
 
 					db.all(`
 						SELECT * FROM usuario
-						WHERE idSala = ${idSala}
+						WHERE idSala = '${idSala}'
 						;`, (err, rows) => {
 							if (err) return console.error(err)
 
