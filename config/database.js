@@ -44,12 +44,13 @@ const createTable = () => {
 
 		db.exec(`
 			CREATE TABLE IF NOT EXISTS carta(
-				id INTEGER PRIMARY KEY AUTOINCREMENT,
-				idSala TEXT,
+				idSala TEXT NOT NULL,
+				id INTEGER NOT NULL,
 				value INTEGER,
 				label TEXT,
 				type TEXT,
 				FOREIGN KEY(idSala) REFERENCES sala(idSala)
+				UNIQUE(idSala, id)
 			);`);
 
 		db.exec(`

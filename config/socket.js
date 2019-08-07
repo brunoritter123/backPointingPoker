@@ -96,7 +96,7 @@ module.exports = function (server) {
     socket.on('update-sala', (myId, userName, isUpdConfig, sala) => {
       console.log("update-sala")
       if (sala !== undefined) {
-        SalaService.updateSala(sala, (doc) => {
+        SalaService.updateSala(sala, isUpdConfig, (doc) => {
           io.to(doc.idSala).emit('get-sala', doc, myId, userName, isUpdConfig);
         });
       }

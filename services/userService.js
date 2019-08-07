@@ -15,14 +15,16 @@ module.exports = class UserService {
 		db.serialize( () => {
 			db.run(`
 			INSERT OR REPLACE INTO usuario
-				(idSala, idUser, idSocket, status, nome, isJogador)
+				(idSala, idUser, idSocket, status, nome, isJogador, idCarta)
 			VALUES (
 				'${usuario.idSala}',
 				'${usuario.idUser}',
 				'${usuario.idSocket}',
 				'${usuario.status}',
 				'${usuario.nome}',
-				 ${String(usuario.isJogador)});`,[], (err) => {
+				 ${String(usuario.isJogador)},
+				(SELECT idCarta FROM usuario WHERE idUser = '${usuario.idUser}')
+				);`,[], (err) => {
 					if (err) return console.error(err)
 
 					db.all(`
