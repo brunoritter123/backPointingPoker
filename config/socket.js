@@ -13,7 +13,6 @@ module.exports = function (server) {
 // DISCONNECT
 //---------
     socket.on('disconnect', () => {
-      console.log("disconnect")
       US.setOff(socket.id, (users, idSala) => {
         io.to(idSala).emit('get-user', {users: users, timeEnvio: new Date().getTime()});
       })
@@ -23,7 +22,6 @@ module.exports = function (server) {
 // REMOVE
 //---------
     socket.on('remove', (idSala, idUser, timeEnvio) => {
-      console.log("remove")
       if (idSala !== undefined && idUser !== undefined) {
         US.remove(idSala, idUser, (users) => {
           io.to(idSala).emit('get-user', {users: users, timeEnvio: timeEnvio})
@@ -35,7 +33,6 @@ module.exports = function (server) {
 // ADD-VOTO
 //---------
     socket.on('add-voto', (idUser, carta, idSala, timeEnvio) => {
-      console.log("add-voto")
       if (carta && idUser) {
         US.addVoto(idUser, carta, idSala, (users) => {
           io.to(idSala).emit('get-user', {users: users, timeEnvio: timeEnvio});
@@ -55,7 +52,6 @@ module.exports = function (server) {
 // ADD-USER
 //---------
     socket.on('add-user', (idSala, idUser, userName, isJogador, voto, timeEnvio) => {
-      console.log("add-user")
       if (idSala !== undefined && idUser !== undefined && userName !== undefined && isJogador !== undefined) {
         socket.join(idSala);
 
@@ -82,7 +78,6 @@ module.exports = function (server) {
 // RESET
 //-----------
   socket.on('reset', (idSala, timeEnvio) => {
-    console.log("reset")
     if (idSala !== undefined) {
       US.reset(idSala, (users) => {
         io.to(idSala).emit('get-user', {users: users, timeEnvio: timeEnvio});
@@ -93,10 +88,14 @@ module.exports = function (server) {
 //-----------
 // UPDATE-SALA
 //-----------
-    socket.on('update-sala', (myId, userName, isUpdConfig, sala) => {
-      console.log("update-sala")
+    socket.on('update-sala', (myId, userName, isUpdConfig, sala, timeEnvio) => {
       if (sala !== undefined) {
         SalaService.updateSala(sala, isUpdConfig, (doc) => {
+          if (isUpdConfig) {
+            US.reset(doc.idSala, (users) => {
+              io.to(doc.idSala).emit('get-user', {users: users, timeEnvio: timeEnvio});
+            });
+          }
           io.to(doc.idSala).emit('get-sala', doc, myId, userName, isUpdConfig);
         });
       }

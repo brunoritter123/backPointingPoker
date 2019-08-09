@@ -66,6 +66,7 @@ module.exports = class SalaService {
 							});
 		
 						stmt.finalize();
+
 						SalaService.updApenasSala(sala, callback)
 					})
 			} else {
@@ -117,21 +118,21 @@ module.exports = class SalaService {
 		}
 
 		const cartasDef = [
-			{idSala: idSala , id: 1, value:  1       , label: '1', type:'default'},
-			{idSala: idSala , id: 2, value:  2       , label: '2', type:'default'},
-			{idSala: idSala , id: 3, value:  3       , label: '3', type:'default'},
-			{idSala: idSala , id: 4, value:  5       , label: '5', type:'default'},
-			{idSala: idSala , id: 5, value:  8       , label: '8', type:'default'},
-			{idSala: idSala , id: 6, value: 13       , label:'13', type:'default'},
-			{idSala: idSala , id: 7, value: 21       , label:'21', type:'default'},
-			{idSala: idSala , id: 8, value: 34       , label:'34', type:'default'},
-			{idSala: idSala , id: 9, value: 55       , label:'55', type:'default'},
-			{idSala: idSala , id: 10, value: undefined, label:'?' , type:'default'}
+			{idSala: idSala , value:  1       , label: '1', type:'default'},
+			{idSala: idSala , value:  2       , label: '2', type:'default'},
+			{idSala: idSala , value:  3       , label: '3', type:'default'},
+			{idSala: idSala , value:  5       , label: '5', type:'default'},
+			{idSala: idSala , value:  8       , label: '8', type:'default'},
+			{idSala: idSala , value: 13       , label:'13', type:'default'},
+			{idSala: idSala , value: 21       , label:'21', type:'default'},
+			{idSala: idSala , value: 34       , label:'34', type:'default'},
+			{idSala: idSala , value: 55       , label:'55', type:'default'},
+			{idSala: idSala , value: undefined, label:'?' , type:'default'}
 		];
 
 		db.serialize( () => {
 			let stmt = db.prepare(` INSERT INTO carta
-				(idSala, id, value, label, type)
+				(idSala, value, label, type)
 				VALUES(?, ?, ?, ?)`);
 
 			cartasDef.forEach(carta => {
