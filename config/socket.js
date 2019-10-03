@@ -1,8 +1,6 @@
 socketIo     = require('socket.io');
 US           = require('../services/userService');
-SalaSchema   = require('../models/salaSchema');
 SalaService  = require('../services/salaService');
-CartaSchema  = require('../models/cartaSchema');
 
 module.exports = function (server) {
   let io = socketIo.listen(server);

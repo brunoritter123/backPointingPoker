@@ -1,79 +1,71 @@
-const sqlite3 = require('sqlite3').verbose();
+const knex = require('./conKnex')
 
-const createTable = () => {
-
-	db.serialize( () => {
-/*
-		db.exec(`
-			CREATE TABLE IF NOT EXISTS acoesSala(
-				label TEXT,
-				value INTEGER
-			);`);
-*/
-		db.exec(`
-			CREATE TABLE IF NOT EXISTS acoesSala(
-				value TEXT PRIMARY KEY,
-				label TEXT
-			);`, () => {
-				db.exec(`
-				INSERT INTO acoesSala(label,value)
-					SELECT 'Ambos', '3'
-					WHERE NOT EXISTS(SELECT 1 FROM acoesSala WHERE value = '3')
-				UNION
-					SELECT 'Administrador', '1'
-					WHERE NOT EXISTS(SELECT 1 FROM acoesSala WHERE value = '1')
-				UNION
-					SELECT 'Jogador', '2'
-					WHERE NOT EXISTS(SELECT 1 FROM acoesSala WHERE value = '2')
-				;`)
-			});
-
-		db.exec(`
-			CREATE TABLE IF NOT EXISTS sala(
-				idSala TEXT PRIMARY KEY,
-				forceFimJogo INTEGER,
-				finalizar TEXT,
-				resetar TEXT,
-				removerJogador TEXT,
-				removerAdm TEXT,
-				FOREIGN KEY(finalizar) REFERENCES acoesSala(value),
-				FOREIGN KEY(resetar) REFERENCES acoesSala(value),
-				FOREIGN KEY(removerJogador) REFERENCES acoesSala(value),
-				FOREIGN KEY(removerAdm) REFERENCES acoesSala(value)
-			);`);
-
-		db.exec(`
-			CREATE TABLE IF NOT EXISTS carta(
-				id INTEGER PRIMARY KEY AUTOINCREMENT,
-				idSala TEXT,
-				value INTEGER,
-				label TEXT,
-				type TEXT,
-				FOREIGN KEY(idSala) REFERENCES sala(idSala)
-			);`);
-
-		db.exec(`
-			CREATE TABLE IF NOT EXISTS usuario(
-				idUser TEXT PRIMARY KEY,
-				idSala TEXT,
-				idSocket TEXT,
-				status TEXT,
-				nome TEXT,
-				isJogador INTEGER,
-				idCarta INTEGER,
-				FOREIGN KEY(idCarta) REFERENCES carta(id)
-				FOREIGN KEY(idSala) REFERENCES sala(idSala)
-			);`);
-	});
-}
-
-let db = new sqlite3.Database("./dataBase.sqlite3", (err) => {
-	if (err) {
-		console.log('Erro ao criar o banco de dados', err)
-	} else {
-		createTable()
+knex.schema.hasTable('acoesSala').then(function(exists) {
+	console.log("1")
+	if (!exists) {
+		return knex.schema.createTable('acoesSala', function(table) {
+			table.string('value', 1).primary();
+			table.string('label', 20);
+		})
+		.then(function(){
+			return knex('acoesSala').insert([
+				{value: '3', label: 'Ambos'},
+				{value: '1', label: 'Administrador'},
+				{value: '2', label: 'Jogador'},
+			])
+		})
+		.catch((err) => { console.log(err); throw err });
 	}
+}).then(function(){
+	return knex.schema.hasTable('sala').then(function(exists) {
+		console.log("2")
+		if (!exists) {
+			return knex.schema.createTable('sala', function(table) {
+				table.string('idSala', 30).primary();
+				table.integer('forceFimJogo');
+				table.string('finalizar', 1);
+				table.string('resetar', 1);
+				table.string('removerJogador', 1);
+				table.string('removerAdm', 1);
+				table.foreign('finalizar').references('acoesSala.value');
+				table.foreign('resetar').references('acoesSala.value');
+				table.foreign('removerJogador').references('acoesSala.value');
+				table.foreign('removerAdm').references('acoesSala.value');
+			}).catch((err) => { console.log(err); throw err });
+		}
+	});
+}).then(function(){
+	return knex.schema.hasTable('carta').then(function(exists) {
+		console.log("3")
+		
+		if (!exists) {
+			return knex.schema.createTable('carta', function(table) {
+				table.increments('id').primary();
+				table.string('idSala', 30);
+				table.integer('value');
+				table.string('label', 20);
+				table.string('type', 20);
+				table.foreign('idSala').references('sala.idSala');
+			}).catch((err) => { console.log(err); throw err });
+		}
+	});
+}).then(function(){
+	return knex.schema.hasTable('usuario').then(function(exists) {
+		console.log("4")
+		if (!exists) {
+			return knex.schema.createTable('usuario', function(table) {
+				table.string('idUser', 50).primary();
+				table.string('idSala', 30);
+				table.string('idSocket', 50);
+				table.string('status', 20);
+				table.string('nome', 50);
+				table.integer('isJogador');
+				table.integer('idCarta');
+				table.foreign('idSala').references('sala.idSala');
+				table.foreign('idCarta').references('carta.id');
+			}).catch((err) => { console.log(err); throw err });
+		}
+	});
 })
-
-
-module.exports = db
+.catch((err) => { console.log(err); throw err })
+.finally(() => knex.destroy());

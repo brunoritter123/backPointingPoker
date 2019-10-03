@@ -1,13 +1,4 @@
-SalaSchema = require('../models/salaSchema');
-CartaSchema = require('../models/cartaSchema');
-AcoesSalaSchema = require('../models/acoesSalaSchema');
-sqlite3      = require('sqlite3').verbose();
-
-const db = new sqlite3.Database("./dataBase.sqlite3", (err) =>{
-	if (err) {
-		console.error(err);
-	}
-});
+const db = require('./../config/conKnex')
 
 module.exports = class SalaService {
 
