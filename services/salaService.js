@@ -22,33 +22,29 @@ module.exports = class SalaService {
 	}
 
 	async static updateSala(sala, isUpdConfig, callback) {
-		db.serialize( () => {
+		try {
+			const trx = await knex.transaction()
 			if (isUpdConfig) {
-				db.run(`
-					DELETE FROM carta
-					WHERE idSala = '${sala.idSala}'
-					;`, [], (err) => {
-						if (err) return console.error(err)
+				await trx('carta').where('idSala', sala.idSala).del()
+				await trx('carta').insert(sala.cartas)
+				SalaService.updApenasSala(trx, sala, callback)
 
-						let stmt = db.prepare(` INSERT INTO carta
-								(idSala, value, label, type)
-								VALUES(?, ?, ?, ?)`);
-		
-								sala.cartas.forEach(carta => {
-								stmt.run(sala.idSala, carta.value, carta.label, carta.type)
-							});
-		
-						stmt.finalize();
-
-						SalaService.updApenasSala(sala, callback)
-					})
 			} else {
-				SalaService.updApenasSala(sala, callback)
+				SalaService.updApenasSala(trx, sala, callback)
 			}
-		})
+		} catch (err){
+			return console.error(err)
+		}
 	}
 
-	async static updApenasSala(sala, callback) {
+	async static updApenasSala(trx, sala, callback) {
+
+		await trx('usuario').where('idUser', '=', idUser).update({idCarta: voto.id})
+		const allUserSala = await trx.select().from('usuario').where('idSala', idSala)
+		await trx.commit()
+
+		callback(allUserSala)
+
 		db.serialize( () => {
 			db.run(`
 					UPDATE sala SET
@@ -78,6 +74,7 @@ module.exports = class SalaService {
 						})
 					})
 			})
+
 	}
 
 	async static newSala(idSala, callback) {
