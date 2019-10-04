@@ -1,45 +1,27 @@
-const db = require('./../config/conKnex')
+const knex = require('./../config/conKnex')
 
 module.exports = class SalaService {
 
-	static loginUser (idSala, callback) {
-		db.serialize( () => {
-			db.get(`
-				SELECT * FROM sala
-				WHERE idSala = '${idSala}'
-				;`,[], (err,sala) => {
-					if (err) return console.error(err)
+	async static loginUser (idSala, callback) {
+		try {
+			const resSala = await knex.select('*').from('sala').where('idSala', '=', idSala)
+			if (resSala.length > 0) {
+				const sala = resSala[0] // Não deveria ser possível existir duas salas com o mesmo idSala
 
-					if (sala) {
-						db.all(`
-							SELECT * FROM carta
-							WHERE idSala = '${idSala}'
-							;`, (err, newCartas) => {
-								if (err) return console.error(err)
+				sala.cartas = await knex.select('*').from('carta').where('idSala', idSala)
 
-								sala.cartas = newCartas
-								callback(sala)
-							})
+				callback(sala)
 
-					} else {
-						SalaService.newSala(idSala, callback)
-					}
-				})
-		})
+			} else {
+				SalaService.newSala(idSala, callback)
+			}
+
+		} catch (err){
+			return console.error(err)
+		}
 	}
 
-	static saveSala(idSala, callback) {
-		db.get(`
-				SELECT * FROM sala
-				WHERE idSala = '${idSala}'
-				;`,[], (err,row) => {
-					if (err) return console.error(err)
-
-					callback(row);
-		})
-	}
-
-	static updateSala(sala, isUpdConfig, callback) {
+	async static updateSala(sala, isUpdConfig, callback) {
 		db.serialize( () => {
 			if (isUpdConfig) {
 				db.run(`
@@ -66,7 +48,7 @@ module.exports = class SalaService {
 		})
 	}
 
-	static updApenasSala(sala, callback) {
+	async static updApenasSala(sala, callback) {
 		db.serialize( () => {
 			db.run(`
 					UPDATE sala SET
@@ -98,7 +80,7 @@ module.exports = class SalaService {
 			})
 	}
 
-	static newSala(idSala, callback) {
+	async static newSala(idSala, callback) {
 		const sala = {
 			idSala: idSala,
 			forceFimJogo: 0,
