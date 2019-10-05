@@ -1,8 +1,11 @@
 socketIo     = require('socket.io');
-US           = require('../services/userService');
-SalaService  = require('../services/salaService');
+userServ     = require('../services/userService');
+salaServ     = require('../services/salaService');
 
-module.exports = function (server) {
+module.exports = function (server, knex) {
+  const US = new userServ(knex)
+  const SalaService  = new salaServ(knex)
+
   let io = socketIo.listen(server);
 
   io.on('connection', (socket) => {

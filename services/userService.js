@@ -1,29 +1,34 @@
-const knex = require('./../config/conKnex')
 
-module.exports = class UserService {
+module.exports = function UserService(db) {
+	this.knex = db
 
-	async static loginUser (usuario, callback) {
+
+	this.loginUser = async function(usuario, callback) {
+		const trx = await this.knex.transaction()
+
 		try {
-			const trx = await knex.transaction()
-			const res = await trx.select('idUser').from('usuario').where('idUser', usuario.idUser)
-			if (res.length === 0) {
-				await trx('usuario').insert({ usuario })
+			const res = await trx.select('idUser').from('usuario').where('idUser', usuario.idUser).first()
+			if (!res) {
+				await trx('usuario').insert(usuario)
 			} else {
 				await trx('usuario').where('idUser', '=', usuario.idUser).update(usuario)
 			}
 			const allUserSala = await trx.select().from('usuario').where('idSala', usuario.idSala)
+
 			await trx.commit()
 
 			callback(allUserSala)
 
 		} catch (err){
+			await trx.rollback()
 			return console.error(err)
 		}
 	}
 
-	async static remove (idSala, idUser, callback) {
+	this.remove  = async function(idSala, idUser, callback) {
+		const trx = await this.knex.transaction()
+
 		try {
-			const trx = await knex.transaction()
 			await trx('usuario').where('idUser', idUser).del()
 			const allUserSala = await trx.select().from('usuario').where('idSala', idSala)
 			await trx.commit()
@@ -31,13 +36,15 @@ module.exports = class UserService {
 			callback(allUserSala)
 
 		} catch (err){
+			await trx.rollback()
 			return console.error(err)
 		}
 	}
 
-	async static addVoto (idUser, voto, idSala, callback) {
+	this.addVoto = async function(idUser, voto, idSala, callback) {
+		const trx = await this.knex.transaction()
+
 		try {
-			const trx = await knex.transaction()
 			await trx('usuario').where('idUser', '=', idUser).update({idCarta: voto.id})
 			const allUserSala = await trx.select().from('usuario').where('idSala', idSala)
 			await trx.commit()
@@ -45,32 +52,37 @@ module.exports = class UserService {
 			callback(allUserSala)
 
 		} catch (err){
+			await trx.rollback()
 			return console.error(err)
 		}
 	}
 
-	async static setOff (idSocket, callback) {
+	this.setOff = async function(idSocket, callback) {
+		const trx  = await this.knex.transaction()
+
 		try {
-			const trx       = await knex.transaction()
-			const resIdSala = await trx('usuario').where('idSocket', '=', idSocket).update({status: 'OFF'}).returning('idSala')
-			if (resIdSala.length > 0) {
-				const allUserSala = await trx.select().from('usuario').where('idSala', resIdSala[0])
+			await trx('usuario').where('idSocket', '=', idSocket).update({status: 'OFF'})
+			const resIdSala = await trx.select('idSala').from('usuario').where('idSocket', '=', idSocket).first()
+			if (!!resIdSala) {
+				const allUserSala = await trx.select().from('usuario').where('idSala', resIdSala)
 				await trx.commit()
 
-				callback(allUserSala, resIdSala[0])
+				callback(allUserSala, resIdSala)
 
 			} else {
 				await trx.rollback()
 			}
 
 		} catch (err){
+			await trx.rollback()
 			return console.error(err)
 		}
 	}
 
-	async static reset (idSala, callback) {
+	this.reset = async function(idSala, callback) {
+		const trx = await this.knex.transaction()
+
 		try {
-			const trx = await knex.transaction()
 			await trx('usuario').where('idSala', '=', idSala).update({idCarta: null})
 			const allUserSala = await trx.select().from('usuario').where('idSala', idSala)
 			await trx.commit()
@@ -78,6 +90,7 @@ module.exports = class UserService {
 			callback(allUserSala)
 
 		} catch (err){
+			await trx.rollback()
 			return console.error(err)
 		}
 	}

@@ -3,7 +3,8 @@ var knex = require('knex')({
     connection: {
       filename: "./dataBase.sqlite3"
     },
-    useNullAsDefault: true
+    useNullAsDefault: true,
+    pool: { min: 0, max: 1 }
   });
 
 module.exports = knex

@@ -1,144 +1,104 @@
-const knex = require('./../config/conKnex')
 
-module.exports = class SalaService {
+module.exports = function SalaService(db) {
+	this.knex = db
 
-	async static loginUser (idSala, callback) {
+	this.loginUser = async function(idSala, callback) {
 		try {
-			const resSala = await knex.select('*').from('sala').where('idSala', '=', idSala)
-			if (resSala.length > 0) {
-				const sala = resSala[0] // Não deveria ser possível existir duas salas com o mesmo idSala
+			let sala = await this.knex.select().from('sala').where('idSala', '=', idSala).first()
 
-				sala.cartas = await knex.select('*').from('carta').where('idSala', idSala)
-
-				callback(sala)
-
+			if (!!sala) {
+				sala.cartas = await this.knex.select().from('carta').where('idSala', idSala)
 			} else {
-				SalaService.newSala(idSala, callback)
+				sala = await this.newSala(idSala)
 			}
+
+			callback(sala)
 
 		} catch (err){
 			return console.error(err)
 		}
 	}
 
-	async static updateSala(sala, isUpdConfig, callback) {
+	this.updateSala = async function(sala, isUpdConfig, callback) {
+		const trx = await this.knex.transaction()
+
 		try {
-			const trx = await knex.transaction()
 			if (isUpdConfig) {
 				await trx('carta').where('idSala', sala.idSala).del()
 				await trx('carta').insert(sala.cartas)
-				SalaService.updApenasSala(trx, sala, callback)
-
-			} else {
-				SalaService.updApenasSala(trx, sala, callback)
 			}
+
+			const salaAtu = await this.updApenasSala(trx, sala)
+			await trx.commit()
+
+			callback(salaAtu)
+
 		} catch (err){
+			await trx.rollback()
 			return console.error(err)
 		}
 	}
 
-	async static updApenasSala(trx, sala, callback) {
+	this.updApenasSala = async function(trx, sala) {
+		return new Promise( async function(resolve, reject) {
+			try {
+				await trx('sala').where('idSala', '=', sala.idSala).update({
+					forceFimJogo  : sala.forceFimJogo,
+					finalizar     : sala.finalizar,
+					resetar       : sala.resetar,
+					removerJogador: sala.removerJogador,
+					removerAdm    : sala.removerAdm
+				})
+				sala = await trx.select().from('sala').where('idSala', sala.idSala).first()
+				sala.cartas = await trx.select().from('carta').where('idSala', sala.idSala)
 
-		await trx('usuario').where('idUser', '=', idUser).update({idCarta: voto.id})
-		const allUserSala = await trx.select().from('usuario').where('idSala', idSala)
-		await trx.commit()
+				resolve(sala)
 
-		callback(allUserSala)
-
-		db.serialize( () => {
-			db.run(`
-					UPDATE sala SET
-						forceFimJogo = ${sala.forceFimJogo},
-						finalizar = '${sala.finalizar}',
-						resetar = '${sala.resetar}',
-						removerJogador = '${sala.removerJogador}',
-						removerAdm = '${sala.removerAdm}'
-					WHERE idSala = '${sala.idSala}'
-					;`, [], (err) => {
-						if (err) return console.error(err)
-
-						db.get(`
-							SELECT * FROM sala
-							WHERE idSala = '${sala.idSala}'
-							;`, (err, sala) => {
-								if (err) return console.error(err)
-								db.all(`
-									SELECT * FROM carta
-									WHERE idSala = '${sala.idSala}'
-									;`, (err, newCartas) => {
-										if (err) return console.error(err)
-
-										sala.cartas = newCartas
-										callback(sala)
-									})
-						})
-					})
-			})
+			} catch(err) {
+				reject(err);
+			}
+		})
 
 	}
 
-	async static newSala(idSala, callback) {
-		const sala = {
-			idSala: idSala,
-			forceFimJogo: 0,
-			finalizar: '1',
-			resetar: '1',
-			removerJogador: '1',
-			removerAdm: '3'
-		}
+	this.newSala = async function(idSala) {
+		const trx = await this.knex.transaction()
 
-		const cartasDef = [
-			{idSala: idSala , value:  1       , label: '1', type:'default'},
-			{idSala: idSala , value:  2       , label: '2', type:'default'},
-			{idSala: idSala , value:  3       , label: '3', type:'default'},
-			{idSala: idSala , value:  5       , label: '5', type:'default'},
-			{idSala: idSala , value:  8       , label: '8', type:'default'},
-			{idSala: idSala , value: 13       , label:'13', type:'default'},
-			{idSala: idSala , value: 21       , label:'21', type:'default'},
-			{idSala: idSala , value: 34       , label:'34', type:'default'},
-			{idSala: idSala , value: 55       , label:'55', type:'default'},
-			{idSala: idSala , value: undefined, label:'?' , type:'default'}
-		];
+		return new Promise( async function(resolve, reject) {
 
-		db.serialize( () => {
-			let stmt = db.prepare(` INSERT INTO carta
-				(idSala, value, label, type)
-				VALUES(?, ?, ?, ?)`);
+			try {
+				const sala = {
+					idSala: idSala,
+					forceFimJogo: 0,
+					finalizar: '1',
+					resetar: '1',
+					removerJogador: '1',
+					removerAdm: '3'
+				}
 
-			cartasDef.forEach(carta => {
-				stmt.run(carta.idSala, carta.value, carta.label, carta.type)
-			});
+				const cartasDef = [
+					{idSala: idSala , value:  1       , label: '1', type:'default'},
+					{idSala: idSala , value:  2       , label: '2', type:'default'},
+					{idSala: idSala , value:  3       , label: '3', type:'default'},
+					{idSala: idSala , value:  5       , label: '5', type:'default'},
+					{idSala: idSala , value:  8       , label: '8', type:'default'},
+					{idSala: idSala , value: 13       , label:'13', type:'default'},
+					{idSala: idSala , value: 21       , label:'21', type:'default'},
+					{idSala: idSala , value: 34       , label:'34', type:'default'},
+					{idSala: idSala , value: 55       , label:'55', type:'default'},
+					{idSala: idSala , value: undefined, label:'?' , type:'default'}
+				];
 
-			stmt.finalize();
+				await trx('carta').insert(cartasDef)
+				await trx('sala').insert(sala)
+				sala.cartas = await trx.select('*').from('carta').where('idSala', idSala)
+				await trx.commit()
+				resolve(sala)
 
-			db.run(`
-				INSERT INTO sala
-					(idSala, forceFimJogo, finalizar, resetar, removerJogador, removerAdm)
-				VALUES (
-					'${sala.idSala}',
-					${sala.forceFimJogo},
-					'${sala.finalizar}',
-					'${sala.resetar}',
-					'${sala.removerJogador}',
-					'${sala.removerAdm}');`,[], (err) => {
-						if (err) return console.error(err)
-						db.get(`
-							SELECT * FROM sala
-							WHERE idSala = '${idSala}'
-							;`, (err, newSala) => {
-								if (err) return console.error(err)
-
-								db.all(`
-									SELECT * FROM carta
-									WHERE idSala = '${idSala}'
-									;`, (err, newCartas) => {
-										if (err) return console.error(err)
-
-										newSala.cartas = newCartas
-										callback(newSala)
-									})
-						})
-					})
+			} catch(err) {
+				await trx.rollback()
+				reject(err);
+			}
 		})
 	}
 }
