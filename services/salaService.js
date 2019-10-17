@@ -19,6 +19,34 @@ module.exports = function SalaService(db) {
 		}
 	}
 
+	this.updateCarta = async function(carta) {
+		const trx = await this.knex.transaction()
+		try {
+			await trx('carta').where('id', '=', carta.id).update({
+				nmUltHist  : carta.nmUltHist
+			})
+			await trx.commit()
+
+		} catch (err){
+			await trx.rollback()
+			return console.error(err)
+		}
+	}
+
+	this.updateHistoria = async function(idSala, nmHistoria) {
+		const trx = await this.knex.transaction()
+		try {
+			await trx('sala').where('idSala', '=', idSala).update({
+				nmHistoria  : nmHistoria
+			})
+			await trx.commit()
+
+		} catch (err){
+			await trx.rollback()
+			return console.error(err)
+		}
+	}
+
 	this.updateSala = async function(sala, isUpdConfig, callback) {
 		const trx = await this.knex.transaction()
 

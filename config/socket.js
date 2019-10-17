@@ -65,12 +65,11 @@ module.exports = function (server, knex) {
           isJogador: isJogador?1:0
         };
 
-        US.loginUser(usuario ,(docs) => {
-          io.to(idSala).emit('get-user', {users: docs, timeEnvio: timeEnvio});
-        })
-
         SalaService.loginUser(idSala, (sala) => {
-          io.to(socket.id).emit('get-sala', sala);
+          US.loginUser(usuario ,(docs) => {
+            io.to(socket.id).emit('get-sala', {sala: sala, nmHistoria: ""});
+            io.to(idSala).emit('get-user', {users: docs, timeEnvio: timeEnvio});
+          })
          });
       }
     });
@@ -97,9 +96,32 @@ module.exports = function (server, knex) {
               io.to(doc.idSala).emit('get-user', {users: users, timeEnvio: timeEnvio});
             });
           }
-          io.to(doc.idSala).emit('get-sala', doc, myId, userName, isUpdConfig);
+          io.to(doc.idSala).emit('get-sala', {sala: doc, nmHistoria: ""});
         });
       }
     });
+
+    //-----------
+    // concluir
+    //-----------
+    socket.on('concluir', (idSala, carta, timeEnvio) => {
+      if (!!carta && !!carta.nmUltHist) {
+        SalaService.updateCarta(carta)
+        SalaService.updateHistoria(idSala, "")
+
+        io.to(idSala).emit('get-carta', {carta: carta, timeEnvio: timeEnvio});
+      }
+    });
+
+    //-----------
+    // Update-Historia
+    //-----------
+    socket.on('update-historia', (idSala, nmHistoria, timeEnvio) => {
+      if (!!nmHistoria) {
+        SalaService.updateHistoria(idSala, nmHistoria)
+        io.to(idSala).emit('get-sala', {sala: null, nmHistoria: nmHistoria});
+      }
+    });
+
   });
 }
