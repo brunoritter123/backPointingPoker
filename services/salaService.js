@@ -105,11 +105,11 @@ module.exports = function SalaService(db) {
 				}
 
 				const cartasDef = [
-					{idSala: idSala , value:  1       , label: '1', type:'default'},
-					{idSala: idSala , value:  2       , label: '2', type:'default'},
-					{idSala: idSala , value:  3       , label: '3', type:'default'},
-					{idSala: idSala , value:  5       , label: '5', type:'default'},
-					{idSala: idSala , value:  8       , label: '8', type:'default'},
+					{idSala: idSala , value:  1       , label:'01', type:'default'},
+					{idSala: idSala , value:  2       , label:'02', type:'default'},
+					{idSala: idSala , value:  3       , label:'03', type:'default'},
+					{idSala: idSala , value:  5       , label:'05', type:'default'},
+					{idSala: idSala , value:  8       , label:'08', type:'default'},
 					{idSala: idSala , value: 13       , label:'13', type:'default'},
 					{idSala: idSala , value: 21       , label:'21', type:'default'},
 					{idSala: idSala , value: 34       , label:'34', type:'default'},
