@@ -41,11 +41,12 @@ module.exports = function UserService(db) {
 		}
 	}
 
-	this.addVoto = async function(idUser, voto, idSala, callback) {
-		const trx = await this.knex.transaction()
+	this.addVoto = async function(idUser, carta, idSala, callback) {
+		const trx = await this.knex.transaction();
+		const voto = !!carta ? carta.id : null;
 
 		try {
-			await trx('usuario').where('idUser', '=', idUser).update({idCarta: voto.id})
+			await trx('usuario').where('idUser', '=', idUser).update({idCarta: voto})
 			const allUserSala = await trx.select().from('usuario').where('idSala', idSala)
 			await trx.commit()
 

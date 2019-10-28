@@ -34,7 +34,7 @@ module.exports = function (server, knex) {
 // ADD-VOTO
 //---------
     socket.on('add-voto', (idUser, carta, idSala, timeEnvio) => {
-      if (carta && idUser) {
+      if (!!idUser) {
         US.addVoto(idUser, carta, idSala, (users) => {
           io.to(idSala).emit('get-user', {users: users, timeEnvio: timeEnvio});
         })
