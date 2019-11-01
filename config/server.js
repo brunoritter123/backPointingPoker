@@ -10,24 +10,21 @@ const port = process.env.PORT || 3000;
 app.use(express.static(__dirname + '/dist'))
 
 app.all('/api/jira/*', (req, res) => {
-    const methodRequest = req.method
-    const baseUrl = req.header('Base-Url')
-    const auth = req.header('Authorization')
-    const urlRequest = req.url.replace('/api/jira', baseUrl)
-
-    var requisicao = { method: methodRequest,
-        url: urlRequest,
-        headers:{ 'Authorization': auth } };
-
+    const requisicao = {
+        method: req.method,
+        url: req.url.replace('/api/jira', req.header('Base-Url')),
+        headers:{ 'Authorization': req.header('Authorization') } 
+    };
 
     request(requisicao, function (error, response, body) {
         if (error) throw new Error(error);
-      
-        res.send(body);
+
+        res.status(response.statusCode).send(body);
       });
   });
 
 app.get('/*', (req,res) => res.sendFile(path.join(__dirname)));
+
 const server = http.createServer(app);
 
 server.listen(port, () => console.log('Running...'));
