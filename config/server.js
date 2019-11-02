@@ -10,17 +10,26 @@ const port = process.env.PORT || 3000;
 app.use(express.static(__dirname + '/dist'))
 
 app.all('/api/jira/*', (req, res) => {
-    const requisicao = {
-        method: req.method,
-        url: req.url.replace('/api/jira', req.header('Base-Url')),
-        headers:{ 'Authorization': req.header('Authorization') } 
-    };
+    try {
+        const requisicao = {
+            method: req.method,
+            url: req.url.replace('/api/jira', req.header('Base-Url')),
+            headers:{ 'Authorization': req.header('Authorization') }
+        };
 
-    request(requisicao, function (error, response, body) {
-        if (error) throw new Error(error);
+        request(requisicao, function (error, response, body) {
+            try {
+                if (error) throw new Error(error);
+                res.status(response.statusCode).send(body);
+            }
+            catch (err) {
+                res.status(500).send({ error: 'Não foi possível realizar a requisição.', detalhes: err });
+            }
+          });
 
-        res.status(response.statusCode).send(body);
-      });
+    } catch (err) {
+        res.status(500).send({ error: 'Não foi possível realizar a requisição.', detalhes: err });
+    }
   });
 
 app.get('/*', (req,res) => res.sendFile(path.join(__dirname)));
