@@ -26,7 +26,7 @@ module.exports = function (knex) {
 					table.string('resetar', 1);
 					table.string('removerJogador', 1);
 					table.string('removerAdm', 1);
-					table.string('nmHistoria', 50);
+					table.string('nmHistoria', 200);
 					table.foreign('finalizar').references('acoesSala.value');
 					table.foreign('resetar').references('acoesSala.value');
 					table.foreign('removerJogador').references('acoesSala.value');
@@ -44,7 +44,7 @@ module.exports = function (knex) {
 					table.integer('value');
 					table.string('label', 20);
 					table.string('type', 20);
-					table.string('nmUltHist', 50);
+					table.string('nmUltHist', 200);
 					table.foreign('idSala').references('sala.idSala');
 				}).catch((err) => { console.error(err); throw err });
 			}
