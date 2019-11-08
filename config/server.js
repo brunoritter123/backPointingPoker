@@ -8,13 +8,20 @@ const request = require("request");
 
 const port = process.env.PORT || 3000;
 app.use(express.static(__dirname + '/dist'))
+app.use(express.json());
 
 app.all('/api/jira/*', (req, res) => {
     try {
         const requisicao = {
             method: req.method,
             url: req.url.replace('/api/jira', req.header('Base-Url')),
-            headers:{ 'Authorization': req.header('Authorization') }
+            body: req.body,
+            json: true,
+            headers:{ 
+                'Authorization': req.header('Authorization'),
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            }
         };
 
         request(requisicao, function (error, response, body) {
