@@ -67,7 +67,7 @@ module.exports = function (server, knex) {
 
         SalaService.loginUser(idSala, (sala) => {
           US.loginUser(usuario ,(docs) => {
-            io.to(socket.id).emit('get-sala', {sala: sala, nmHistoria: ""});
+            io.to(socket.id).emit('get-sala', {sala: sala, nmHistoria: undefined});
             io.to(idSala).emit('get-user', {users: docs, timeEnvio: timeEnvio});
           })
          });
@@ -96,7 +96,7 @@ module.exports = function (server, knex) {
               io.to(doc.idSala).emit('get-user', {users: users, timeEnvio: timeEnvio});
             });
           }
-          io.to(doc.idSala).emit('get-sala', {sala: doc, nmHistoria: ""});
+          io.to(doc.idSala).emit('get-sala', {sala: doc, nmHistoria: undefined});
         });
       }
     });
@@ -119,7 +119,7 @@ module.exports = function (server, knex) {
     socket.on('update-historia', (idSala, nmHistoria, timeEnvio) => {
       if (!!nmHistoria) {
         SalaService.updateHistoria(idSala, nmHistoria)
-        io.to(idSala).emit('get-sala', {sala: null, nmHistoria: nmHistoria});
+        io.to(idSala).emit('get-sala', {sala: undefined, nmHistoria: nmHistoria});
       }
     });
 
