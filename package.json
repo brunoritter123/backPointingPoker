@@ -13,7 +13,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "node loader"
+    "start": "node --http-parser=legacy loader.js"
   },
   "repository": {
     "type": "git",
