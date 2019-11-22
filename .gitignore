@@ -6,6 +6,7 @@
 /dist-server
 /tmp
 /out-tsc
+/daemon
 
 # dependencies
 /node_modules
