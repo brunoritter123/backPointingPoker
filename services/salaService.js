@@ -35,6 +35,8 @@ module.exports = function SalaService(db) {
 
 	this.updateHistoria = async function(idSala, nmHistoria) {
 		const trx = await this.knex.transaction()
+
+		nmHistoria = !!nmHistoria ? '': nmHistoria
 		try {
 			await trx('sala').where('idSala', '=', idSala).update({
 				nmHistoria  : nmHistoria
@@ -74,6 +76,7 @@ module.exports = function SalaService(db) {
 					forceFimJogo  : sala.forceFimJogo,
 					finalizar     : sala.finalizar,
 					resetar       : sala.resetar,
+					nmHistoria    : sala.nmHistoria,
 					removerJogador: sala.removerJogador,
 					removerAdm    : sala.removerAdm
 				})
