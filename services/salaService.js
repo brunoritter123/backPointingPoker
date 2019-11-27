@@ -36,7 +36,7 @@ module.exports = function SalaService(db) {
 	this.updateHistoria = async function(idSala, nmHistoria) {
 		const trx = await this.knex.transaction()
 
-		nmHistoria = !!nmHistoria ? '': nmHistoria
+		nmHistoria = !!nmHistoria ? nmHistoria: ''
 		try {
 			await trx('sala').where('idSala', '=', idSala).update({
 				nmHistoria  : nmHistoria

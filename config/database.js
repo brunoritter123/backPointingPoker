@@ -1,4 +1,4 @@
-//const knex = require('./conKnex')
+const VERSAO_BD = 1
 
 module.exports = function (knex) {
 	knex.schema.hasTable('acoesSala').then(function(exists) {
@@ -62,6 +62,18 @@ module.exports = function (knex) {
 					table.integer('idCarta');
 					table.foreign('idSala').references('sala.idSala');
 					table.foreign('idCarta').references('carta.id');
+				}).catch((err) => { console.error(err); throw err });
+			}
+		});
+	}).then(function(){
+		return knex.schema.hasTable('versao').then(function(exists) {
+			if (!exists) {
+				return knex.schema.createTable('versao', function(table) {
+					table.integer('versao').primary();
+				}).then(function(){
+					return knex('versao').insert([
+						{versao: VERSAO_BD}
+					])
 				}).catch((err) => { console.error(err); throw err });
 			}
 		});
