@@ -120,8 +120,8 @@ module.exports = function SalaService(db) {
 					{idSala: idSala , value: undefined, label:'?' , type:'default'}
 				];
 
-				await trx('carta').insert(cartasDef)
 				await trx('sala').insert(sala)
+				await trx('carta').insert(cartasDef)
 				sala.cartas = await trx.select('*').from('carta').where('idSala', idSala)
 				await trx.commit()
 				resolve(sala)
