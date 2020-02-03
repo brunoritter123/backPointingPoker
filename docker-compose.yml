@@ -6,3 +6,7 @@ services:
       - 3000:3000
     environment:
       scrumpoker_connection_string: ${scrumpoker_connection_string}
+#networks:
+#  default:
+#    external:
+#      name: host

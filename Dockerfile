@@ -6,8 +6,8 @@ ENV scrumpoker_connection_string = ${scrumpoker_connection_string}
 RUN npm install -g @angular/cli@8.1.0 && \
 	mkdir /app && \
 	cd /app && \
-	git clone https://github.com/brunoritter123/pointingPoker.git && \
-	git clone https://github.com/brunoritter123/backPointingPoker.git && \
+	git clone https://github.com/brunoritter123/pointingPoker.git --depth 1 && \
+	git clone https://github.com/brunoritter123/backPointingPoker.git --depth 1 && \
 	cd backPointingPoker && \
 	npm install && \
 	cd .. && \
