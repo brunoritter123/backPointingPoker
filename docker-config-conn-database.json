@@ -1,0 +1,13 @@
+{
+  "client": "pg",
+  "connection": {
+    "host": "db",
+    "user": "postgres",
+    "password": "postgres",
+    "database": "scrumpoker"
+  },
+  "searchPath": [
+    "knex",
+    "public"
+  ]
+}

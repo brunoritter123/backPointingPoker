@@ -1,8 +1,6 @@
 FROM node:12.14
 LABEL maintainer 'Bruno Ritter <brunosk8123@hotmail.com>'
 
-ENV scrumpoker_connection_string = ${scrumpoker_connection_string}
-
 RUN npm install -g @angular/cli@8.1.0 && \
 	mkdir /app && \
 	cd /app && \
@@ -20,5 +18,6 @@ RUN npm install -g @angular/cli@8.1.0 && \
 	cp -r pointingPoker/dist backPointingPoker/config
 
 WORKDIR /app/backPointingPoker
+COPY docker-config-conn-database.json /app/backPointingPoker/config/conn-database.json
 EXPOSE 3000
 CMD npm start

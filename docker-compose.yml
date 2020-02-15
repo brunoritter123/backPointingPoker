@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3'
 services:
   db:
     image: postgres
@@ -9,15 +9,13 @@ services:
     volumes:
       - ./pgdata:/var/lib/postgresql/data
     ports:
-      - 5432:5432
+      - "5432:5432"
   scrumpoker:
     image: scrumpoker
     depends_on:
       - db
     ports:
-      - 3000:3000
-    environment:
-    scrumpoker_connection_string: ${scrumpoker_connection_string}
+      - "3000:3000"
 #networks:
 #  default:
 #    external:
