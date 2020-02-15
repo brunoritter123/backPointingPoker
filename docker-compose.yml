@@ -1,7 +1,8 @@
 version: '3'
 services:
   db:
-    image: postgres
+    image: postgres:alpine
+    restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -11,8 +12,13 @@ services:
     ports:
       - "5432:5432"
   scrumpoker:
-    image: scrumpoker
+    build: "./"
+    container_name: scrumpoker
+    restart: always
     depends_on:
       - db
     ports:
       - "3000:3000"
+volumes:
+  pgdata:
+    driver: local
