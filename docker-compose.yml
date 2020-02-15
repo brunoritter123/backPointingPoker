@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: scrumpoker
     volumes:
-      - ./pgdata:/var/lib/postgresql/data
+      - "./pgdata:/var/lib/postgresql/data"
     ports:
       - "5432:5432"
   scrumpoker:
@@ -16,7 +16,3 @@ services:
       - db
     ports:
       - "3000:3000"
-#networks:
-#  default:
-#    external:
-#      name: host
